@@ -1,0 +1,83 @@
+name: CI Pipeline - 7 Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci-checks:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: todos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v18) and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Wait for DB to be ready
+        run: |
+          for i in $(seq 1 10); do
+            nc -z 127.0.0.1 5432 && break
+            echo "Waiting for PostgreSQL service..."
+            sleep 1
+          done
+          
+      
+      - name: 3. Format Check (Fail if needed)
+        run: pnpm format:check
+
+      - name: 4. Linter Passes
+        run: pnpm lint
+
+      - name: 5. Documentation/Storybook Build Check
+        run: pnpm build-storybook
+
+
+      - name: 6. Docker Image Builds Successfully
+        run: docker build . --file Dockerfile --tag app-build-check
+        
+      - name: 7. Application Builds Successfully
+        run: pnpm build
+
+
+      - name: Setup Database Schema
+        env:
+          DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/todos
+        run: pnpm db:push
+        
+      - name: 1. Unit Tests Pass
+        run: pnpm test
+
+      - name: Start App for E2E Tests (Background)
+        env:
+          DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/todos
+        run: pnpm start & 
+        
+      - name: 2. E2E Tests Pass
+        run: pnpm test:e2e

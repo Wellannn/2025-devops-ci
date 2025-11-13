@@ -1,4 +1,4 @@
-name: CI Pipeline - 7 Checks
+name: CI Pipeline - 7 Checks & Auto-Fix
 
 on:
   push:
@@ -9,7 +9,8 @@ on:
       - main
 
 jobs:
-  ci-checks:
+  ci: 
+    name: CI Pipeline - 7 Checks
     runs-on: ubuntu-latest
     
     services:
@@ -36,11 +37,12 @@ jobs:
         with:
           node-version: 18
 
-      - name: 📥 Setup pnpm (Correction de l'erreur précédente)
+      - name: 📥 Setup pnpm (Correction d'environnement)
         uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: false 
+          
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -85,3 +87,42 @@ jobs:
         
       - name: 2. E2E Tests Pass
         run: pnpm test:e2e
+
+
+  auto-format:
+    name: 🔄 Auto Format Fix (Bonus)
+    runs-on: ubuntu-latest
+    if: failure() && github.event_name == 'pull_request'
+    needs: [ci] 
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: 🛠️ Setup Node.js (v18)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      
+      - name: 📥 Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false 
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 💻 Run Auto-Format (pnpm format)
+        run: pnpm format 
+
+      - name: 💾 Commit and Push Auto-Fix
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style(auto): Corrige le formatage via CI"
+          commit_user_name: GitHub Actions Bot (Auto-Format)
+          commit_author: Auto-Format Bot <auto-format@users.noreply.github.com>
+          commit_options: '--no-verify --allow-empty'

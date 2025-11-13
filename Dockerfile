@@ -1,5 +1,7 @@
 FROM node:18-alpine AS builder
 
+RUN npm install -g pnpm
+
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 USER appuser
 
@@ -14,6 +16,8 @@ RUN pnpm build
 
 
 FROM node:18-alpine AS production
+
+RUN npm install -g pnpm
 
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 USER appuser

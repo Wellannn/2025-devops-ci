@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
+          
       - name: 📥 Setup pnpm (Correction d'environnement)
         uses: pnpm/action-setup@v3
         with:
@@ -54,7 +54,6 @@ jobs:
             sleep 1
           done
           
-      
       - name: 3. Format Check (Fail if needed)
         run: pnpm format:check
 
@@ -69,7 +68,6 @@ jobs:
         
       - name: 7. Application Builds Successfully
         run: pnpm build
-
 
       - name: 💾 Setup Database Schema
         env:
@@ -105,7 +103,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
+      
       - name: 📥 Setup pnpm
         uses: pnpm/action-setup@v3
         with:

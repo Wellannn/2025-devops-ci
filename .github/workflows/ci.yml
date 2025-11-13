@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  ci: 
+  ci:
     name: CI Pipeline - 7 Checks
     runs-on: ubuntu-latest
     
@@ -62,9 +62,9 @@ jobs:
         run: pnpm lint
 
       - name: 5. Documentation/Storybook Build Check
-        run: |
-          NODE_OPTIONS='--experimental-vm-modules' pnpm build-storybook
+        run: sh -c "NODE_OPTIONS='--experimental-vm-modules' pnpm exec storybook build"
 
+      
       - name: 6. Docker Image Builds Successfully
         run: docker build . --file Dockerfile --tag app-build-check
         

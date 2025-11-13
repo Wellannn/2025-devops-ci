@@ -62,8 +62,7 @@ jobs:
         run: pnpm lint
 
       - name: 5. Documentation/Storybook Build Check
-        run: pnpm build-storybook
-
+        run: node --experimental-vm-modules $(which pnpm) build-storybook
 
       - name: 6. Docker Image Builds Successfully
         run: docker build . --file Dockerfile --tag app-build-check

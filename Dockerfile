@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 RUN npm install -g pnpm@8
 
@@ -15,7 +15,7 @@ COPY . .
 RUN pnpm build
 
 
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 RUN npm install -g pnpm@8
 

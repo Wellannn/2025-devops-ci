@@ -46,6 +46,9 @@ jobs:
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 🌐 Download Playwright Browsers (Correction E2E)
+        run: pnpm exec playwright install
+        
       - name: ⏳ Wait for DB to be ready
         run: |
           for i in $(seq 1 10); do
@@ -61,9 +64,11 @@ jobs:
         run: pnpm lint
 
       - name: 5. Documentation/Storybook Build Check
+        # Utilise la commande simple après la mise à jour vers Node V20
         run: pnpm build-storybook
 
       - name: 6. Docker Image Builds Successfully
+        # Cette étape devrait maintenant fonctionner grâce à la modification du Dockerfile
         run: docker build . --file Dockerfile --tag app-build-check
         
       - name: 7. Application Builds Successfully

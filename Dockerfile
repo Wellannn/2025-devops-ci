@@ -20,6 +20,7 @@ FROM node:20-alpine AS production
 RUN npm install -g pnpm@8
 
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN chown -R appuser:appgroup /app
 USER appuser
 
 ENV NODE_ENV production
